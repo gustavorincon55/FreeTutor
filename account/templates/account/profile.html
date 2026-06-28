@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile - FreeTutor</title>
+</head>
+<body>
+    <h1>{{ user.username }}'s Profile</h1>
+    
+    <h2>Account Information</h2>
+    <p><strong>Username:</strong> {{ user.username }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    
+    <h2>Profile Information</h2>
+    <p><strong>Bio:</strong> {{ profile.bio|default:"No bio added yet" }}</p>
+    
+    <h2>Tutor Information</h2>
+    <p><strong>Is Tutor:</strong> {{ profile.is_tutor|yesno:"Yes,No" }}</p>
+    <p><strong>Subjects I Tutor:</strong> {{ profile.tutor_subjects|default:"None" }}</p>
+    
+    <h2>Learner Information</h2>
+    <p><strong>Is Learner:</strong> {{ profile.is_learner|yesno:"Yes,No" }}</p>
+    <p><strong>Subjects I'm Learning:</strong> {{ profile.learner_subjects|default:"None" }}</p>
+    
+    <p><a href="{% url 'logout' %}">Logout</a></p>
+</body>
+</html>
