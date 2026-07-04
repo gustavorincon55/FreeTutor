@@ -22,7 +22,7 @@ Free tutoring to kids in need.
   2. cd backend && venv/bin/python manage.py runserver 8000
 
   If a port is already in use and you need to free it:
-  lsof -ti:8000 | xargs kill -9   # kill whatever is on port 8000
-  lsof -ti:5173 | xargs kill -9   # kill whatever is on port 5173
+  - lsof -ti:8000 | xargs kill -9   # kill whatever is on port 8000
+  - lsof -ti:5173 | xargs kill -9   # kill whatever is on port 5173
 
   Then start normally again.
