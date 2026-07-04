@@ -64,6 +64,13 @@ export default function Availability() {
       setFormError('Start time must be before end time.');
       return;
     }
+    const duplicate = formData.time_windows.some(
+      (w) => w.day === windowDraft.day && w.start === windowDraft.start && w.end === windowDraft.end
+    );
+    if (duplicate) {
+      setFormError('This time window already exists.');
+      return;
+    }
     setFormData({ ...formData, time_windows: [...formData.time_windows, { ...windowDraft }] });
     setWindowDraft(EMPTY_WINDOW);
     setFormError('');
