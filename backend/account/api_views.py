@@ -382,9 +382,15 @@ def _serialize_post(post, requesting_user):
 def post_list_api(request):
     if request.method == 'GET':
         filter_type = request.query_params.get('type')
+        filter_topic = request.query_params.get('topic', '').strip()
+        filter_author = request.query_params.get('author', '').strip()
         posts = Post.objects.select_related('user__profile').prefetch_related('sessions').all()
         if filter_type in ('offer', 'request'):
             posts = posts.filter(type=filter_type)
+        if filter_topic:
+            posts = posts.filter(topic__icontains=filter_topic)
+        if filter_author:
+            posts = posts.filter(user__username__icontains=filter_author)
 
         result = []
         for post in posts:

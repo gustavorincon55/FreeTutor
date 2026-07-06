@@ -242,6 +242,8 @@ export default function Feed() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [topicFilter, setTopicFilter] = useState('');
+  const [authorFilter, setAuthorFilter] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [connectPost, setConnectPost] = useState(null);
   const [postType, setPostType] = useState('offer');
@@ -253,9 +255,13 @@ export default function Feed() {
   const [formError, setFormError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const fetchPosts = async (type = 'all') => {
-    const params = type !== 'all' ? `?type=${type}` : '';
-    const res = await api.get(`/api/posts/${params}`);
+  const fetchPosts = async (type = 'all', topic = '', author = '') => {
+    const params = new URLSearchParams();
+    if (type !== 'all') params.set('type', type);
+    if (topic) params.set('topic', topic);
+    if (author) params.set('author', author);
+    const query = params.toString();
+    const res = await api.get(`/api/posts/${query ? `?${query}` : ''}`);
     setPosts(res.data);
     setLoading(false);
   };
@@ -274,7 +280,7 @@ export default function Feed() {
     }
   };
 
-  useEffect(() => { fetchPosts(filter); }, [filter]);
+  useEffect(() => { fetchPosts(filter, topicFilter, authorFilter); }, [filter, topicFilter, authorFilter]);
   useEffect(() => { fetchAvailability(); fetchUserSessions(); }, []);
 
   const topicsForType = postType === 'offer'
@@ -502,15 +508,33 @@ export default function Feed() {
       {connectPost && (
         <ConnectModal
           post={connectPost}
-          onClose={() => { setConnectPost(null); fetchPosts(filter); }}
+          onClose={() => { setConnectPost(null); fetchPosts(filter, topicFilter, authorFilter); }}
         />
       )}
 
       {/* Filter bar */}
-      <div className="flex gap-2 mb-5">
-        <button className={filterBtnCls('all')} onClick={() => setFilter('all')}>All</button>
-        <button className={filterBtnCls('offer')} onClick={() => setFilter('offer')}>Offers</button>
-        <button className={filterBtnCls('request')} onClick={() => setFilter('request')}>Requests</button>
+      <div className="flex flex-col gap-3 mb-5">
+        <div className="flex gap-2">
+          <button className={filterBtnCls('all')} onClick={() => setFilter('all')}>All</button>
+          <button className={filterBtnCls('offer')} onClick={() => setFilter('offer')}>Offers</button>
+          <button className={filterBtnCls('request')} onClick={() => setFilter('request')}>Requests</button>
+        </div>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            placeholder="Topic…"
+            value={topicFilter}
+            onChange={(e) => setTopicFilter(e.target.value)}
+            className="border border-blue-100 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-600 w-40"
+          />
+          <input
+            type="text"
+            placeholder="Author…"
+            value={authorFilter}
+            onChange={(e) => setAuthorFilter(e.target.value)}
+            className="border border-blue-100 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-600 w-40"
+          />
+        </div>
       </div>
 
       {posts.length === 0 ? (
@@ -524,7 +548,7 @@ export default function Feed() {
               key={post.id}
               post={post}
               onDelete={handleDelete}
-              onSlotAccepted={() => fetchPosts(filter)}
+              onSlotAccepted={() => fetchPosts(filter, topicFilter, authorFilter)}
               onConnect={setConnectPost}
             />
           ))}
