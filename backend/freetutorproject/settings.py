@@ -27,6 +27,13 @@ SECRET_KEY = 'django-insecure-=qb%^5+i^1i&&6#dkamz+q&no+o9#fv*9xq@h7vnfa-3m-)c)n
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
+if not DEBUG:
+    SESSION_COOKIE_SAMESITE = 'None'
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SAMESITE = 'None'
+    CSRF_COOKIE_SECURE = True
+
+
 ALLOWED_HOSTS = ['freetutor.onrender.com', 'localhost', '127.0.0.1']
 
 
