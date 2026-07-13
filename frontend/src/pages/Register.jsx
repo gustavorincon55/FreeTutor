@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import api from '../api';
+import api, { resetCsrf } from '../api';
 import { inferTimezone } from '../components/TimezoneSelect';
 
 const PREDEFINED_TOPICS = [
@@ -44,6 +44,7 @@ export default function Register() {
     setLoading(true);
     try {
       await api.post('/api/register/', form);
+      resetCsrf();
 
       const fd = new FormData();
       fd.append('is_tutor', String(isTutor));

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import api from '../api';
+import api, { resetCsrf } from '../api';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -14,6 +14,7 @@ export default function Login() {
     setError('');
     try {
       await api.post('/api/login/', form);
+      resetCsrf();
       navigate('/profile');
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed.');
