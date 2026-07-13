@@ -8,17 +8,31 @@ const api = axios.create({
   withCredentials: true,
 });
 
-function getCsrfFromCookie() {
-  const match = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
-  return match ? match[1] : null;
-}
+//Gustavo: Trying to fix an issue with the deployed webapp. 
+// function getCsrfFromCookie() {
+//   const match = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
+//   return match ? match[1] : null;
+// }
+
+// async function ensureCsrf() {
+//   if (!getCsrfFromCookie()) {
+//     await api.get('/api/csrf/');
+//   }
+//   return getCsrfFromCookie();
+// }
+
+let csrfToken = null;
 
 async function ensureCsrf() {
-  if (!getCsrfFromCookie()) {
-    await api.get('/api/csrf/');
+  if (!csrfToken) {
+    const res = await api.get('/api/csrf/');
+    csrfToken = res.data.csrfToken;
   }
-  return getCsrfFromCookie();
+  return csrfToken;
 }
+
+export const resetCsrf = () => { csrfToken = null; };
+
 
 api.interceptors.request.use(async (config) => {
   if (['post', 'put', 'patch', 'delete'].includes(config.method)) {
@@ -28,7 +42,8 @@ api.interceptors.request.use(async (config) => {
   return config;
 });
 
-// kept for compatibility — logout calls this, but cookie-based approach doesn't need it
-export const resetCsrf = () => {};
+// //Gustavo: Trying to fix an issue with the deployed webapp. 
+// // kept for compatibility — logout calls this, but cookie-based approach doesn't need it
+// export const resetCsrf = () => {};
 
 export default api;
