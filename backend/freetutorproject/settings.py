@@ -110,6 +110,15 @@ DATABASES = {
 }
 
 
+#to connect to the render deployement database, for production.
+import os
+import dj_database_url
+
+if os.environ.get('DATABASE_URL'):
+    DATABASES['default'] = dj_database_url.config()
+
+
+
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
