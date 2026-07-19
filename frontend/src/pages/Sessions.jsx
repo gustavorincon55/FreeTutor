@@ -3,15 +3,31 @@ import api from '../api';
 import { useAuth } from '../context/AuthContext';
 
 function SessionCard({ session, currentUserId, onAction }) {
-  const { status, tutor, learner, topic, day, start_time, end_time } = session;
+  const { status, tutor, learner, topic, day, start_time, end_time, meeting_link, notes } = session;
   const isLearner = learner.id === currentUserId;
   const isTutor = tutor?.id === currentUserId;
   const [loading, setLoading] = useState(null);
+  const [meetingLink, setMeetingLink] = useState(meeting_link || '');
+  const [sessionNotes, setSessionNotes] = useState(notes || '');
 
   const act = async (action) => {
     setLoading(action);
     try { await onAction(session.id, action); }
     finally { setLoading(null); }
+  };
+
+  const saveSessionDetails = async () => {
+    setLoading('save');
+
+    try {
+      await api.patch(`/api/sessions/${session.id}/`, {
+        meeting_link: meetingLink,
+        notes: sessionNotes
+      });
+      window.location.reload();
+    } finally {
+      setLoading(null);
+    }
   };
 
   const statusLabel = (() => {
@@ -50,6 +66,34 @@ function SessionCard({ session, currentUserId, onAction }) {
           <span className="font-medium text-gray-700">Learner: </span>{learner.username}
         </span>
       </div>
+
+      {status === 'confirmed' && (
+        <div className="flex flex-col gap-2 text-xs">
+          <input
+            type="url"
+            value={meetingLink}
+            onChange={(e) => setMeetingLink(e.target.value)}
+            placeHolder="Meeting link"
+            className="border rounded px-2 py-1"
+          />
+
+          <textarea
+            value={sessionNotes}
+            onChange={(e) => setSessionNotes(e.target.value)}
+            placeholder="Session notes"
+            className="border rounded px-2 py-1"
+            rows="3"
+          />
+
+          <button
+            onClick={saveSessionDetails}
+            disabled={loading === 'save'}
+            className="bg-blue-600 text-white rounded px-3 py-1 w-fit"
+          >
+            {loading === 'save' ? 'Saving...' : 'Save'}
+          </button>
+        </div>
+      )}
 
       <div className="flex gap-2 flex-wrap pt-1">
         {/* Tutor confirms a session a learner connected to (offer flow) */}
