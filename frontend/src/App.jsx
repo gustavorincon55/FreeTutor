@@ -6,6 +6,7 @@ import Profile from './pages/Profile';
 import Availability from './pages/Availability';
 import Sessions from './pages/Sessions';
 import Feed from './pages/Feed';
+import Calendar from './pages/Calendar';
 import './App.css';
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/availability" element={<Availability />} />
           <Route path="/sessions" element={<Sessions />} />
+          <Route path="/calendar" element={<Calendar />} />
         </Route>
       </Routes>
     </BrowserRouter>

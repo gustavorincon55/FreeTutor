@@ -48,6 +48,8 @@ def _serialize_session(s):
         'day': s.day,
         'start_time': str(s.start_time)[:5],
         'end_time': str(s.end_time)[:5],
+        'meeting_link': s.meeting_link,
+        'notes': s.notes,
         'status': s.status,
         'post_id': s.post_id,
         'created_at': s.created_at.isoformat(),
@@ -228,18 +230,30 @@ def sessions_api(request):
     ).exclude(status='cancelled').order_by('-created_at')
     return Response([_serialize_session(s) for s in my_sessions])
 
+@api_view(['PATCH'])
+def session_update_api(request, pk):
+    try:
+        session = Session.objects.get(pk=pk)
+    except Session.DoesNotExist:
+        return Response({'error': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+    if session.tutor != request.user and session.learner != request.user:
+        return Response({'error': 'Forbidden.'}, status=status.HTTP_403_FORBIDDEN)
+    if 'meeting_link' in request.data:
+        session.meeting_link = request.data.get('meeting_link', '').strip()
+    if 'notes' in request.data:
+        session.notes = request.data.get('notes', '').strip()
+    session.save()
+    return Response(_serialize_session(session))
+    
 
 @api_view(['GET'])
 def open_sessions_api(request):
     """Open sessions matching the current user's tutor availability (for tutors to browse and accept)."""
     topic = request.query_params.get('topic', '').strip()
-
     avail_qs = Availability.objects.filter(user=request.user, role='tutor')
     if topic:
         avail_qs = avail_qs.filter(topic__iexact=topic)
-
     open_sessions = Session.objects.filter(status='open').exclude(learner=request.user).select_related('learner', 'post')
-
     matching = []
     seen = set()
     for session in open_sessions:

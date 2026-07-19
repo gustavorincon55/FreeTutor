@@ -17,6 +17,7 @@ urlpatterns = [
     path('api/availability/<int:pk>/', api_views.availability_detail_api, name='api-availability-detail'),
     path('api/sessions/', api_views.sessions_api, name='api-sessions'),
     path('api/sessions/open/', api_views.open_sessions_api, name='api-sessions-open'),
+    path('api/sessions/<int:pk>/', api_views.session_update_api, name='api-session-update'),
     path('api/sessions/<int:pk>/action/', api_views.session_action_api, name='api-session-action'),
     path('api/posts/', api_views.post_list_api, name='api-post-list'),
     path('api/posts/<int:pk>/', api_views.post_detail_api, name='api-post-detail'),
