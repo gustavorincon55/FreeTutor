@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 
-function SessionCard({ session, currentUserId, onAction }) {
+function SessionCard({ session, currentUserId, onAction, onSaved }) {
   const { status, tutor, learner, topic, day, start_time, end_time, meeting_link, notes } = session;
   const isLearner = learner.id === currentUserId;
   const isTutor = tutor?.id === currentUserId;
@@ -24,7 +24,7 @@ function SessionCard({ session, currentUserId, onAction }) {
         meeting_link: meetingLink,
         notes: sessionNotes
       });
-      window.location.reload();
+      await onSaved();
     } finally {
       setLoading(null);
     }
@@ -152,7 +152,7 @@ function SessionCard({ session, currentUserId, onAction }) {
   );
 }
 
-function Section({ title, subtitle, sessions, currentUserId, onAction }) {
+function Section({ title, subtitle, sessions, currentUserId, onAction, onSaved }) {
   if (sessions.length === 0) return null;
   return (
     <div className="mb-7">
@@ -161,7 +161,7 @@ function Section({ title, subtitle, sessions, currentUserId, onAction }) {
       {!subtitle && <div className="mb-3" />}
       <div className="flex flex-col gap-2">
         {sessions.map((s) => (
-          <SessionCard key={s.id} session={s} currentUserId={currentUserId} onAction={onAction} />
+          <SessionCard key={s.id} session={s} currentUserId={currentUserId} onAction={onAction} onSaved={onSaved} />
         ))}
       </div>
     </div>
@@ -265,6 +265,7 @@ export default function Sessions() {
         sessions={confirmed}
         currentUserId={userId}
         onAction={handleAction}
+        onSaved={fetchAll}
       />
     </div>
   );

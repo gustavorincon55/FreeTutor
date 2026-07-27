@@ -27,7 +27,10 @@ SECRET_KEY = 'django-insecure-=qb%^5+i^1i&&6#dkamz+q&no+o9#fv*9xq@h7vnfa-3m-)c)n
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-if not DEBUG:
+# DATABASE_URL is only set on Render, so use it (rather than DEBUG) to detect
+# production — DEBUG defaults to False locally too, and Secure cookies are
+# silently dropped by browsers over plain http://localhost, breaking login.
+if os.environ.get('DATABASE_URL'):
     SESSION_COOKIE_SAMESITE = 'None'
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SAMESITE = 'None'
