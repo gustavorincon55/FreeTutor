@@ -357,6 +357,14 @@ def _post_overlap_windows(post, viewer):
     ]
 
 
+def _post_hidden_from_others(post):
+    """A post no longer matches the author's current role (e.g. they toggled off Tutor/Learner)."""
+    profile = getattr(post.user, 'profile', None)
+    if post.type == 'offer':
+        return not (profile.is_tutor if profile else False)
+    return not (profile.is_learner if profile else False)
+
+
 def _serialize_post(post, requesting_user):
     overlaps = _post_overlap_windows(post, requesting_user)
 
@@ -383,6 +391,7 @@ def _serialize_post(post, requesting_user):
         'is_mine': post.user == requesting_user,
         'can_connect': len(overlaps) > 0,
         'overlap_windows': overlaps,
+        'hidden_from_others': _post_hidden_from_others(post),
         'sessions': sessions_data,
         'user': {
             'username': post.user.username,
@@ -422,6 +431,11 @@ def post_list_api(request):
                     continue
 
             if not is_mine:
+                # Hide if the post no longer matches the author's current role
+                # (e.g. they toggled off Tutor/Learner after posting)
+                if _post_hidden_from_others(post):
+                    continue
+
                 # Hide if the user has a cancelled session on this post (rejected or cancelled by either party)
                 if post.sessions.filter(
                     Q(tutor=request.user) | Q(learner=request.user),
@@ -521,6 +535,9 @@ def post_connect_api(request, pk):
     try:
         post = Post.objects.get(pk=pk)
     except Post.DoesNotExist:
+        return Response({'error': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    if post.user != request.user and _post_hidden_from_others(post):
         return Response({'error': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
 
     allowed_overlaps = _post_overlap_windows(post, request.user)

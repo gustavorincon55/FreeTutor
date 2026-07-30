@@ -167,8 +167,12 @@ function PostCard({ post, onDelete, onSlotAccepted, onConnect }) {
     }
   };
 
+  const isHidden = post.is_mine && post.hidden_from_others;
+
   return (
-    <div className="bg-white border border-blue-100 rounded-xl p-4 flex gap-3">
+    <div className={`border rounded-xl p-4 flex gap-3 ${
+      isHidden ? 'bg-gray-50 border-gray-200 opacity-70' : 'bg-white border-blue-100'
+    }`}>
       <Avatar username={post.user.username} />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap mb-2">
@@ -181,6 +185,14 @@ function PostCard({ post, onDelete, onSlotAccepted, onConnect }) {
           <span className="text-xs bg-blue-50 border border-blue-100 text-blue-700 rounded-full px-2.5 py-0.5 font-medium">
             {post.topic}
           </span>
+          {isHidden && (
+            <span
+              className="text-xs bg-gray-100 border border-gray-300 text-gray-500 rounded-full px-2.5 py-0.5 font-medium flex items-center gap-1"
+              title="Others can't see this post because it no longer matches your current role."
+            >
+              👁 Only visible to you
+            </span>
+          )}
           <span className="text-xs text-gray-400 ml-auto">{timeAgo(post.created_at)}</span>
         </div>
 
