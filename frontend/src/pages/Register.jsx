@@ -45,19 +45,42 @@ export default function Register() {
     try {
       await api.post('/api/register/', form);
       resetCsrf();
-
-      const fd = new FormData();
-      fd.append('is_tutor', String(isTutor));
-      fd.append('is_learner', String(isLearner));
-      fd.append('tutor_subjects', JSON.stringify(isTutor ? selectedTopics : []));
-      fd.append('learner_subjects', JSON.stringify(isLearner ? selectedTopics : []));
-      fd.append('timezone', inferTimezone());
-      await api.patch('/api/profile/', fd);
-
-      navigate('/profile');
     } catch (err) {
       const msg = err.response?.data?.error || err.response?.data?.detail || 'Registration failed.';
       setError(msg);
+      setLoading(false);
+      return;
+    }
+
+    const fd = new FormData();
+    fd.append('is_tutor', String(isTutor));
+    fd.append('is_learner', String(isLearner));
+    fd.append('tutor_subjects', JSON.stringify(isTutor ? selectedTopics : []));
+    fd.append('learner_subjects', JSON.stringify(isLearner ? selectedTopics : []));
+    fd.append('timezone', inferTimezone());
+
+    try {
+      await api.patch('/api/profile/', fd);
+      navigate('/profile');
+    } catch (err) {
+      // The account was already created above. On some mobile browsers the
+      // session cookie from that request isn't available yet for this
+      // follow-up call — re-establish the session and retry once before
+      // giving up.
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        try {
+          await api.post('/api/login/', { username: form.username, password: form.password });
+          resetCsrf();
+          await api.patch('/api/profile/', fd);
+          navigate('/profile');
+        } catch {
+          navigate('/login', {
+            state: { message: 'Account created! Please log in to finish setting up your profile.' },
+          });
+        }
+      } else {
+        setError(err.response?.data?.error || err.response?.data?.detail || 'Registration failed.');
+      }
     } finally {
       setLoading(false);
     }

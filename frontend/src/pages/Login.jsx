@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import api, { resetCsrf } from '../api';
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [form, setForm] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
+  const [info] = useState(location.state?.message || '');
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -25,6 +27,7 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-blue-50">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg border border-blue-100 p-8 flex flex-col gap-5">
         <h2 className="text-2xl font-bold text-blue-600 m-0">Log In</h2>
+        {info && !error && <p className="text-blue-600 text-sm bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">{info}</p>}
         {error && <p className="text-red-600 text-sm">{error}</p>}
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <input
