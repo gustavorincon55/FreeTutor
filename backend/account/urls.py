@@ -22,4 +22,5 @@ urlpatterns = [
     path('api/posts/', api_views.post_list_api, name='api-post-list'),
     path('api/posts/<int:pk>/', api_views.post_detail_api, name='api-post-detail'),
     path('api/posts/<int:pk>/connect/', api_views.post_connect_api, name='api-post-connect'),
+    path('api/change-password/', api_views.change_password_api, name='change-password'),
 ]

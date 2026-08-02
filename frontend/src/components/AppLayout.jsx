@@ -28,6 +28,7 @@ function SidebarContent() {
           <NavLink to="/availability" className={navClass}>Availability</NavLink>
           <NavLink to="/sessions" className={navClass}>Sessions</NavLink>
           <NavLink to="/calendar" className={navClass}>Calendar</NavLink> 
+          <NavLink to="/change-password" className={navClass}>Change Password</NavLink>
         </nav>
 
         <div className="border-t border-blue-100 pt-4">
