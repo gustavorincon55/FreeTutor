@@ -620,3 +620,34 @@ def post_connect_api(request, pk):
             pass
 
     return Response({'sessions': sessions, 'count': len(sessions)}, status=status.HTTP_201_CREATED)
+
+@api_view(['POST'])
+def change_password_api(request):
+    current_password = request.data.get('current_password', '')
+    new_password = request.data.get('new_password', '')
+    confirm_password = request.data.get('confirm_password', '')
+
+    if not request.user.check_password(current_password):
+        return Response(
+            {'error': 'Current password is incorrect.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if not new_password:
+        return Response(
+            {'error': 'New password is required.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if new_password != confirm_password:
+        return Response(
+            {'error': 'New passwords do not match.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    request.user.set_password(new_password)
+    request.user.save()
+
+    login(request, request.user)
+
+    return Response({'message': 'Password changed successfully.'})

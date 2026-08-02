@@ -8,6 +8,7 @@ import Availability from './pages/Availability';
 import Sessions from './pages/Sessions';
 import Feed from './pages/Feed';
 import Calendar from './pages/Calendar';
+import ChangePassword from './pages/ChangePassword';
 import './App.css';
 
 export default function App() {
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/availability" element={<Availability />} />
           <Route path="/sessions" element={<Sessions />} />
           <Route path="/calendar" element={<Calendar />} />
+          <Route path="/change-password" element={<ChangePassword />} />
         </Route>
       </Routes>
     </BrowserRouter>
