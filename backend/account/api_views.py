@@ -3,6 +3,7 @@ from datetime import datetime
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.db.models import Q
 from django.middleware.csrf import get_token
@@ -240,7 +241,31 @@ def session_update_api(request, pk):
     if session.tutor != request.user and session.learner != request.user:
         return Response({'error': 'Forbidden.'}, status=status.HTTP_403_FORBIDDEN)
     if 'meeting_link' in request.data:
+        old_link = session.meeting_link
         session.meeting_link = request.data.get('meeting_link', '').strip()
+
+        if session.meeting_link and session.meeting_link != old_link:
+            recipients = []
+
+            if session.tutor and session.tutor.email:
+                recipients.append(session.tutor.email)
+
+            if session.learner.email:
+                recipients.append(session.learner.email)
+
+            if recipients:
+                send_mail(
+                    subject=f"Meeting link for your {session.topic} session",
+                    message=(
+                        f"Your tutoring session meeting link was updated.\n\n"
+                        f"Subject: {session.topic}\n"
+                        f"Date: {session.day}\n"
+                        f"Time: {session.start_time} - {session.end_time}\n"
+                        f"Meeting link: {session.meeting_link}\n"
+                    ),
+                    from_email=None,
+                    recipient_list=recipients,
+                )
     if session.tutor == request.user and 'tutor_notes' in request.data:
         session.tutor_notes = request.data.get('tutor_notes', '').strip()
     if session.learner == request.user and 'learner_notes' in request.data:
