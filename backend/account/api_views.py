@@ -49,7 +49,8 @@ def _serialize_session(s):
         'start_time': str(s.start_time)[:5],
         'end_time': str(s.end_time)[:5],
         'meeting_link': s.meeting_link,
-        'notes': s.notes,
+        'tutor_notes': s.tutor_notes,
+        'learner_notes': s.learner_notes,
         'status': s.status,
         'post_id': s.post_id,
         'created_at': s.created_at.isoformat(),
@@ -240,8 +241,10 @@ def session_update_api(request, pk):
         return Response({'error': 'Forbidden.'}, status=status.HTTP_403_FORBIDDEN)
     if 'meeting_link' in request.data:
         session.meeting_link = request.data.get('meeting_link', '').strip()
-    if 'notes' in request.data:
-        session.notes = request.data.get('notes', '').strip()
+    if session.tutor == request.user and 'tutor_notes' in request.data:
+        session.tutor_notes = request.data.get('tutor_notes', '').strip()
+    if session.learner == request.user and 'learner_notes' in request.data:
+        session.learner_notes = request.data.get('learner_notes', '').strip()
     session.save()
     return Response(_serialize_session(session))
     

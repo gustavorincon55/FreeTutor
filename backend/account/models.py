@@ -65,8 +65,9 @@ class Session(models.Model):
     start_time = models.TimeField()
     end_time = models.TimeField()
     meeting_link = models.URLField(blank=True, default='')
+    tutor_notes = models.TextField(blank=True, default='')
+    learner_notes = models.TextField(blank=True, default='')
     notes = models.TextField(blank=True, default='')
-
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open')
     post = models.ForeignKey(
         'Post', on_delete=models.SET_NULL,
