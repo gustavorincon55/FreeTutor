@@ -62,6 +62,7 @@ class Session(models.Model):
     learner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='learner_sessions')
     topic = models.CharField(max_length=200)
     day = models.CharField(max_length=20)
+    session_date = models.DateField(null=True, blank=True)
     start_time = models.TimeField()
     end_time = models.TimeField()
     meeting_link = models.URLField(blank=True, default='')
