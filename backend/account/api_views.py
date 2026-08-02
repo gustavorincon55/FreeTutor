@@ -369,7 +369,7 @@ def _post_hidden_from_others(post):
 
 
 def _serialize_post(post, requesting_user):
-    overlaps = _post_overlap_windows(post, requesting_user)
+    overlaps = post.time_slots
 
     # Show active sessions for both post types (open/pending visible to relevant parties)
     sessions_data = []
@@ -444,11 +444,6 @@ def post_list_api(request):
                     Q(tutor=request.user) | Q(learner=request.user),
                     status='cancelled'
                 ).exists():
-                    continue
-
-                # Hide if user has no matching availability/topic
-                overlaps = _post_overlap_windows(post, request.user)
-                if not overlaps:
                     continue
 
             result.append(post)
