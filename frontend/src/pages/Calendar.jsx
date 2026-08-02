@@ -50,8 +50,11 @@ const getSessionsForDay = (day) => {
     }
 
     return sessions.filter((session) => {
-        const sessionDate = new Date(`${session.day}T00:00:00`);
+        if (!session.session_date) {
+            return false;
+        }
 
+        const sessionDate = new Date(`${session.session_date}T00:00:00`);
         return (
             sessionDate.getFullYear() === year &&
             sessionDate.getMonth() === month &&

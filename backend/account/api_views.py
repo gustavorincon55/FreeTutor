@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -47,6 +47,7 @@ def _serialize_session(s):
         'learner': {'id': s.learner.id, 'username': s.learner.username},
         'topic': s.topic,
         'day': s.day,
+        'session_date': s.session_date.isoformat() if s.session_date else None,
         'start_time': str(s.start_time)[:5],
         'end_time': str(s.end_time)[:5],
         'meeting_link': s.meeting_link,
@@ -87,6 +88,23 @@ def _all_hour_slots(time_windows):
             cur += 60
     return slots
 
+def _next_date_for_day(day_name):
+    today = datetime.now().date()
+
+    day_numbers = {'Monday': 0, 'Tuesday': 1, 'Wednesday': 2, 'Thursday': 3, 'Friday': 4, 'Saturday': 5, 'Sunday': 6,
+    }
+
+    target_day = day_numbers.get(day_name)
+
+    if target_day is None:
+        return None
+
+    days_ahead = (target_day - today.weekday()) % 7
+
+    if days_ahead == 0:
+        days_ahead = 7
+
+    return today + timedelta(days=days_ahead)
 
 def _tutor_has_free_slots(tutor_user, topic):
     """Return True if the tutor still has any unbooked 1-hour availability slot for topic."""
@@ -530,6 +548,7 @@ def post_list_api(request):
                 tutor=None,
                 topic=topic,
                 day=slot['day'],
+                session_date=_next_date_for_day(slot['day']),
                 start_time=slot['start'],
                 end_time=slot['end'],
                 status='open',
@@ -593,8 +612,8 @@ def post_connect_api(request, pk):
         try:
             session = Session.objects.create(
                 tutor=tutor, learner=learner, topic=post.topic,
-                day=w['day'], start_time=w['start'], end_time=w['end'],
-                status='pending_tutor', post=post,
+                day=w['day'], session_date=_next_date_for_day(w['day']), start_time=w['start'], end_time=w['end'],
+                status='pending_tutor', post=post, 
             )
             sessions.append(_serialize_session(session))
         except IntegrityError:
