@@ -3,12 +3,13 @@ import api from '../api';
 import { useAuth } from '../context/AuthContext';
 
 function SessionCard({ session, currentUserId, onAction, onSaved }) {
-  const { status, tutor, learner, topic, day, start_time, end_time, meeting_link, notes } = session;
+  const { status, tutor, learner, topic, day, start_time, end_time, meeting_link, tutor_notes, learner_notes } = session;
   const isLearner = learner.id === currentUserId;
   const isTutor = tutor?.id === currentUserId;
   const [loading, setLoading] = useState(null);
   const [meetingLink, setMeetingLink] = useState(meeting_link || '');
-  const [sessionNotes, setSessionNotes] = useState(notes || '');
+  const [tutorNotes, setTutorNotes] = useState(tutor_notes || '');
+  const [learnerNotes, setLearnerNotes] = useState(learner_notes || '');
 
   const act = async (action) => {
     setLoading(action);
@@ -20,10 +21,16 @@ function SessionCard({ session, currentUserId, onAction, onSaved }) {
     setLoading('save');
 
     try {
-      await api.patch(`/api/sessions/${session.id}/`, {
-        meeting_link: meetingLink,
-        notes: sessionNotes
-      });
+      const sessionData = {
+        meeting_link: meetingLink
+      };
+      if (isTutor) {
+        sessionData.tutor_notes = tutorNotes;
+      }
+      if (isLearner) {
+        sessionData.learner_notes = learnerNotes;
+      }
+      await api.patch(`/api/sessions/${session.id}/`, sessionData);
       await onSaved();
     } finally {
       setLoading(null);
@@ -73,18 +80,29 @@ function SessionCard({ session, currentUserId, onAction, onSaved }) {
             type="url"
             value={meetingLink}
             onChange={(e) => setMeetingLink(e.target.value)}
-            placeHolder="Meeting link"
+            placeholder="Meeting link"
             className="border rounded px-2 py-1"
           />
 
+          <label className="font-medium text-gray-700">Tutor notes</label>
           <textarea
-            value={sessionNotes}
-            onChange={(e) => setSessionNotes(e.target.value)}
-            placeholder="Session notes"
+            value={tutorNotes}
+            onChange={(e) => setTutorNotes(e.target.value)}
+            placeholder="Tutor notes"
             className="border rounded px-2 py-1"
             rows="3"
+            disabled={!isTutor}
           />
 
+          <label className="font-medium text-gray-700">Learner notes</label>
+          <textarea
+            value={learnerNotes}
+            onChange={(e) => setLearnerNotes(e.target.value)}
+            placeholder="Learner notes"
+            className="border rounded px-2 py-1"
+            rows="3"
+            disabled={!isLearner}
+          />
           <button
             onClick={saveSessionDetails}
             disabled={loading === 'save'}

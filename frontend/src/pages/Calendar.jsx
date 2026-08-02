@@ -57,7 +57,10 @@ return (
                         )}
                     </p>
                     <p className="text-sm text-gray-500">
-                        Notes: {session.notes || 'No notes added'}
+                        Tutor notes: {session.tutor_notes || 'No tutor notes added'}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                        Learner notes: {session.learner_notes || 'No learner notes added'}
                     </p>
                 </div>
             ))}
